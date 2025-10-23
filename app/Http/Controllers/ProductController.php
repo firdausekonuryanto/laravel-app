@@ -4,65 +4,63 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Events\ProductCreated;
+use App\Models\ProductCategory;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    /**
-     * Menampilkan daftar semua produk.
-     */
     public function index()
     {
-        $products = Product::all();
+        $products = Product::with(['category', 'creator'])
+            ->orderBy('id', 'desc')
+            ->get();
+
         return view('products.index', compact('products'));
     }
 
-    /**
-     * Menampilkan formulir untuk membuat produk baru.
-     */
     public function create()
     {
-        return view('products.create');
+        $categories = ProductCategory::all();
+        $suppliers = Supplier::all();
+
+        return view('products.create', compact('categories', 'suppliers'));
     }
 
-    /**
-     * Menyimpan produk baru ke database.
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
+            'category_id' => 'required|exists:product_categories,id',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'name' => 'required|max:255',
+            'sku' => 'required|unique:products,sku|max:255',
             'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'description' => 'nullable|string',
+            'cost_price' => 'nullable|numeric|min:0',
+            'stock' => 'nullable|integer|min:0',
+            'unit' => 'nullable|max:50',
         ]);
 
-        $product = Product::create($request->all());
-        
-        ProductCreated::dispatch($product);
+        $data = $request->all();
+        $data['created_by'] = 1;
 
-        return redirect()->route('products.index')->with('success', 'Product created successfully.');
+        Product::create($data);
+
+        return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
     }
 
-    /**
-     * Menampilkan detail produk tertentu.
-     */
     public function show(Product $product)
     {
         return view('products.show', compact('product'));
     }
 
-    /**
-     * Menampilkan formulir untuk mengedit produk tertentu.
-     */
     public function edit(Product $product)
     {
-        return view('products.edit', compact('product'));
+        $categories = ProductCategory::orderBy('name')->get();
+        $suppliers = Supplier::orderBy('name')->get();
+        
+        return view('products.edit', compact('product', 'categories', 'suppliers'));
     }
 
-    /**
-     * Memperbarui produk tertentu di database.
-     */
     public function update(Request $request, Product $product)
     {
         $request->validate([
@@ -77,9 +75,6 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 
-    /**
-     * Menghapus produk tertentu dari database.
-     */
     public function destroy(Product $product)
     {
         $product->delete();

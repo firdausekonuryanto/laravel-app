@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Product; // Sesuaikan jika model Anda bukan Product
+use App\Models\Product; 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -19,17 +19,32 @@ class ProductCreated implements ShouldBroadcast
         $this->product = $product;
     }
 
-    // Tentukan Channel Publik
     public function broadcastOn(): array
     {
         return [
-            new Channel('products-channel'), // Semua user akan mendengarkan channel ini
+            new Channel('products-channel'),
         ];
     }
     
-    // Tentukan Nama Event saat disiarkan
     public function broadcastAs()
     {
         return 'new-product-added';
     }
+
+    // --- TAMBAHKAN FUNGSI INI ---
+    public function broadcastWith(): array
+    {
+        // Debug: Kirim hanya field yang dibutuhkan untuk menghindari error serialisasi.
+        // Data di sini harus sesuai dengan e.product.name yang Anda panggil di frontend.
+        return [
+            'product' => [
+                'id' => $this->product->id,
+                'name' => $this->product->name,
+                'price' => $this->product->price,
+                'stock' => $this->product->stock,
+            ],
+            'debug_time' => now()->toDateTimeString(),
+        ];
+    }
+    // ----------------------------
 }

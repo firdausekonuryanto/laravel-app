@@ -1,4 +1,4 @@
-@extends('layouts.app') // Asumsikan Anda menggunakan layout
+@extends('layouts.app')
 
 @section('content')
     <div class="container">
@@ -19,36 +19,57 @@
             </div>
         @endif
 
-        <table class="table table-bordered mt-3">
-            <tr>
-                <th>No</th>
-                <th>Nama</th>
-                <th>Harga</th>
-                <th>Stok</th>
-                <th width="280px">Aksi</th>
-            </tr>
-            @foreach ($products as $product)
+        {{-- Tabel Daftar Produk --}}
+        <table class="table table-bordered table-striped mt-3">
+            <thead>
                 <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $product->name }}</td>
-                    <td>Rp{{ number_format($product->price, 0, ',', '.') }}</td>
-                    <td>{{ $product->stock }}</td>
-                    <td>
-                        <form action="{{ route('products.destroy', $product->id) }}" method="POST">
-
-                            <a class="btn btn-info btn-sm" href="{{ route('products.show', $product->id) }}">Detail</a>
-
-                            <a class="btn btn-primary btn-sm" href="{{ route('products.edit', $product->id) }}">Edit</a>
-
-                            @csrf
-                            @method('DELETE')
-
-                            <button type="submit" class="btn btn-danger btn-sm"
-                                onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">Hapus</button>
-                        </form>
-                    </td>
+                    <th>No</th>
+                    <th>SKU</th>
+                    <th>Nama Produk</th>
+                    <th>Kategori</th>
+                    <th>Harga Jual</th>
+                    <th>Stok</th>
+                    <th>Satuan</th>
+                    <th width="200px">Aksi</th> {{-- Kurangi lebar agar lebih ringkas --}}
                 </tr>
-            @endforeach
+            </thead>
+            <tbody>
+                {{-- Pastikan data produk dikirim dari controller dengan eager loading:
+                    $products = Product::with(['category', 'supplier'])->paginate(10);
+                --}}
+                @foreach ($products as $product)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td><strong>{{ $product->sku }}</strong></td>
+                        <td>{{ $product->name }}</td>
+                        {{-- Mengakses relasi Category --}}
+                        <td>{{ $product->category->name ?? 'N/A' }}</td>
+                        {{-- Menampilkan Harga --}}
+                        <td>Rp{{ number_format($product->price, 0, ',', '.') }}</td>
+                        {{-- Menampilkan Stok --}}
+                        <td>
+                            <span class="badge {{ $product->stock > 10 ? 'bg-success' : 'bg-danger' }}">
+                                {{ $product->stock }}
+                            </span>
+                        </td>
+                        {{-- Menampilkan Satuan --}}
+                        <td>{{ $product->unit }}</td>
+                        <td>
+                            <form action="{{ route('products.destroy', $product->id) }}" method="POST">
+                                <a class="btn btn-info btn-sm" href="{{ route('products.show', $product->id) }}">Detail</a>
+                                <a class="btn btn-primary btn-sm"
+                                    href="{{ route('products.edit', $product->id) }}">Edit</a>
+
+                                @csrf
+                                @method('DELETE')
+
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Apakah Anda yakin ingin menghapus produk {{ $product->name }}?')">Hapus</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
         </table>
     </div>
 @endsection
