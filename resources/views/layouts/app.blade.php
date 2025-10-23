@@ -121,7 +121,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('products.index') }}">
+                                <a class="nav-link" href="{{ route('customers.index') }}">
                                     Customer
                                 </a>
                             </li>
@@ -129,11 +129,11 @@
                     </div>
                 </li>
                 <li class="nav-item menu-items">
-                    <a class="nav-link" href="../../pages/forms/basic_elements.html">
+                    <a class="nav-link" href="{{ route('transactions.index') }}">
                         <span class="menu-icon">
                             <i class="mdi mdi-playlist-play"></i>
                         </span>
-                        <span class="menu-title">Form Elements</span>
+                        <span class="menu-title">Transactions</span>
                     </a>
                 </li>
                 <li class="nav-item menu-items">
