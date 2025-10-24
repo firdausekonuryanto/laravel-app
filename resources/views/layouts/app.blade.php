@@ -5,7 +5,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Corona Admin</title>
+    <title>My POS</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/css/vendor.bundle.base.css') }}">
@@ -18,6 +18,21 @@
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <!-- End layout styles -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}" />
+    <style>
+        .form-control,
+        .asColorPicker-input,
+        .dataTables_wrapper select,
+        .jsgrid .jsgrid-table .jsgrid-filter-row input[type=text],
+        .jsgrid .jsgrid-table .jsgrid-filter-row select,
+        .jsgrid .jsgrid-table .jsgrid-filter-row input[type=number],
+        .select2-container--default .select2-selection--single,
+        .select2-container--default .select2-selection--single .select2-search__field,
+        .typeahead,
+        .tt-query,
+        .tt-hint {
+            color: white !important
+        }
+    </style>
 </head>
 
 <body>
@@ -87,7 +102,7 @@
                     <span class="nav-link">Navigation</span>
                 </li>
                 <li class="nav-item menu-items">
-                    <a class="nav-link" href="../../index.html">
+                    <a class="nav-link" href="{{ route('dashboard.index') }}">
                         <span class="menu-icon">
                             <i class="mdi mdi-speedometer"></i>
                         </span>

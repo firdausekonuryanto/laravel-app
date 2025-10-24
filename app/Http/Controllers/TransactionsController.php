@@ -15,18 +15,7 @@ class TransactionsController extends Controller
      */
     public function index()
     {
-        $transactions = DB::table('transactions')
-            ->join('users', 'transactions.user_id', '=', 'users.id')
-            ->leftJoin('customers', 'transactions.customer_id', '=', 'customers.id')
-            ->leftJoin('payment_methods', 'transactions.payment_method_id', '=', 'payment_methods.id')
-            ->select(
-                'transactions.*',
-                'users.name as user_name',
-                'customers.name as customer_name',
-                'payment_methods.name as payment_method_name'
-            )
-            ->orderBy('transactions.id', 'desc')
-            ->get();
+        $transactions = DB::table('transactions')->join('users', 'transactions.user_id', '=', 'users.id')->leftJoin('customers', 'transactions.customer_id', '=', 'customers.id')->leftJoin('payment_methods', 'transactions.payment_method_id', '=', 'payment_methods.id')->select('transactions.*', 'users.name as user_name', 'customers.name as customer_name', 'payment_methods.name as payment_method_name')->orderBy('transactions.id', 'desc')->get();
 
         return view('transactions.index', compact('transactions'));
     }
@@ -36,49 +25,97 @@ class TransactionsController extends Controller
      */
     public function create()
     {
-        $customers = DB::table('customers')->get();
-        $users = DB::table('users')->get();
-        $paymentMethods = DB::table('payment_methods')->get();
+        // Ambil data relasi untuk dropdown
+        $customers = DB::table('customers')->select('id', 'name')->get();
+        $users = DB::table('users')->select('id', 'name')->get();
+        $paymentMethods = DB::table('payment_methods')->select('id', 'name')->get();
+        $products = DB::table('products')->select('id', 'name', 'price')->get();
 
-        return view('transactions.create', compact('customers', 'users', 'paymentMethods'));
+        return view('transactions.create', compact('customers', 'users', 'paymentMethods', 'products'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'customer_id' => 'nullable|exists:customers,id',
-            'user_id' => 'required|exists:users,id',
-            'payment_method_id' => 'required|exists:payment_methods,id',
-            'total_qty' => 'required|numeric',
-            'total_price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
-            'tax' => 'nullable|numeric',
-            'grand_total' => 'required|numeric',
+   public function store(Request $request)
+{
+    $request->validate([
+        'user_id' => 'required',
+        'payment_method_id' => 'required',
+        'products' => 'required|array|min:1',
+        'products.*.product_id' => 'required|exists:products,id',
+        'products.*.quantity' => 'required|integer|min:1',
+    ]);
+
+    $transactionId = null; // definisikan di luar agar bisa diakses setelah transaction
+
+    DB::transaction(function () use ($request, &$transactionId) {
+        $totalPrice = 0;
+        $totalQty = 0;
+        $details = [];
+
+        // Hitung total dan siapkan detail
+        foreach ($request->products as $item) {
+            $product = DB::table('products')->find($item['product_id']);
+            if (!$product) continue;
+
+            $subtotal = $product->price * $item['quantity'];
+
+            $details[] = [
+                'product_id' => $product->id,
+                'quantity' => $item['quantity'],
+                'price' => $product->price,
+                'subtotal' => $subtotal,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            $totalPrice += $subtotal;
+            $totalQty += $item['quantity'];
+        }
+
+        $discount = $request->discount ?? 0;
+        $tax = 0;
+        $grandTotal = max(0, $totalPrice - $discount + $tax);
+
+        // Ambil nilai uang dibayar dari form
+        $paidAmount = $request->paid_amount ?? $grandTotal;
+        $changeAmount = max(0, $paidAmount - $grandTotal);
+
+        $transactionId = DB::table('transactions')->insertGetId([
+            'invoice_number' => 'INV/' . now()->format('Ym') . '/' . Str::random(8),
+            'customer_id' => $request->customer_id,
+            'user_id' => $request->user_id,
+            'payment_method_id' => $request->payment_method_id,
+            'total_qty' => $totalQty,
+            'total_price' => $totalPrice,
+            'discount' => $discount,
+            'tax' => $tax,
+            'grand_total' => $grandTotal,
+            'paid_amount' => $paidAmount,
+            'change_amount' => $changeAmount,
+            'status' => 'paid',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        $validated['invoice_number'] = 'INV/' . now()->format('Ym') . '/' . Str::random(8);
-        $validated['status'] = 'paid';
-        $validated['paid_amount'] = $validated['grand_total'];
-        $validated['change_amount'] = 0;
+        // Simpan detail produk
+        foreach ($details as $detail) {
+            $detail['transaction_id'] = $transactionId;
+            DB::table('transaction_details')->insert($detail);
+        }
+    });
 
-        Transactions::create($validated);
-
-        return redirect()->route('transactions.index')->with('success', 'Transaction created successfully!');
-    }
+    return redirect()->route('transactions.show', $transactionId)
+                     ->with('success', 'Transaction created successfully!');
+}
 
     /**
      * Display the specified resource.
      */
     public function show(Transactions $transaction)
     {
-        $details = DB::table('transaction_details')
-            ->join('products', 'transaction_details.product_id', '=', 'products.id')
-            ->where('transaction_id', $transaction->id)
-            ->select('transaction_details.*', 'products.name as product_name')
-            ->get();
+        $details = DB::table('transaction_details')->join('products', 'transaction_details.product_id', '=', 'products.id')->where('transaction_id', $transaction->id)->select('transaction_details.*', 'products.name as product_name')->get();
 
         return view('transactions.show', compact('transaction', 'details'));
     }
@@ -147,7 +184,9 @@ class TransactionsController extends Controller
                 $totalQty = 0;
                 $createdAt = now()->subDays($faker->numberBetween(1, 60));
 
-                if ($products->isEmpty()) continue;
+                if ($products->isEmpty()) {
+                    continue;
+                }
 
                 $selectedProducts = $products->random($faker->numberBetween(1, min(5, $products->count())));
 
@@ -171,7 +210,7 @@ class TransactionsController extends Controller
 
                 $discount = $faker->randomElement([0, 5000, 10000, 0, 0]);
                 $tax = 0;
-                $grandTotal = max(0, ($totalPrice - $discount) + $tax);
+                $grandTotal = max(0, $totalPrice - $discount + $tax);
 
                 $transactionData = [
                     'invoice_number' => 'INV/' . now()->format('Ym') . '/' . Str::random(8),

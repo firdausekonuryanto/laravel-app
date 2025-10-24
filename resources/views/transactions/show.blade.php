@@ -14,8 +14,22 @@
                 <p><strong>Total Price:</strong> Rp{{ number_format($transaction->total_price, 0, ',', '.') }}</p>
                 <p><strong>Discount:</strong> Rp{{ number_format($transaction->discount, 0, ',', '.') }}</p>
                 <p><strong>Tax:</strong> Rp{{ number_format($transaction->tax, 0, ',', '.') }}</p>
-                <p><strong>Grand Total:</strong> <span
-                        class="text-success fw-bold">Rp{{ number_format($transaction->grand_total, 0, ',', '.') }}</span></p>
+                <p><strong>Grand Total:</strong>
+                    <span class="text-success fw-bold">
+                        Rp{{ number_format($transaction->grand_total, 0, ',', '.') }}
+                    </span>
+                </p>
+
+                {{-- 🟢 Tambahan baru --}}
+                <p><strong>Amount Paid:</strong>
+                    Rp{{ number_format($transaction->paid_amount ?? 0, 0, ',', '.') }}
+                </p>
+                <p><strong>Change (Kembalian):</strong>
+                    <span class="text-primary">
+                        Rp{{ number_format($transaction->change_amount ?? 0, 0, ',', '.') }}
+                    </span>
+                </p>
+
                 <p><strong>Status:</strong>
                     <span class="badge bg-success">{{ strtoupper($transaction->status) }}</span>
                 </p>

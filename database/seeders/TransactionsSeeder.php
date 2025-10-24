@@ -14,38 +14,39 @@ class TransactionsSeeder extends Seeder
 
     public function run(): void
     {
-
         DB::transaction(function () {
-            
             $faker = Faker::create('id_ID');
 
             $customerIds = DB::table('customers')->pluck('id')->toArray();
             $userIds = DB::table('users')->pluck('id')->toArray();
             $paymentMethodIds = DB::table('payment_methods')->pluck('id')->toArray();
             $products = DB::table('products')->get();
-            
+
             $allTransactionDetails = [];
-            $numberOfTransactions = 20; 
+            $numberOfTransactions = 20;
 
             for ($i = 0; $i < $numberOfTransactions; $i++) {
                 $totalPrice = 0;
                 $totalQty = 0;
-                $createdAt = now()->subDays($faker->numberBetween(1, 60)); 
+                $createdAt = now()->subDays($faker->numberBetween(1, 60));
 
                 if ($products->isEmpty()) {
-                    continue; 
+                    continue;
                 }
-                $selectedProducts = $products->random($faker->numberBetween(1, min(5, $products->count()))); 
+
+                $selectedProducts = $products->random($faker->numberBetween(1, min(5, $products->count())));
 
                 $currentTransactionDetails = [];
+
                 foreach ($selectedProducts as $product) {
                     $quantity = $faker->numberBetween(1, 10);
-                    $subtotal = $quantity * $product->price;
+                    $price = (int) $product->price;
+                    $subtotal = $quantity * $price;
 
                     $currentTransactionDetails[] = [
                         'product_id' => $product->id,
                         'quantity' => $quantity,
-                        'price' => $product->price,
+                        'price' => $price,
                         'subtotal' => $subtotal,
                         'created_at' => $createdAt,
                         'updated_at' => $createdAt,
@@ -54,14 +55,16 @@ class TransactionsSeeder extends Seeder
                     $totalPrice += $subtotal;
                     $totalQty += $quantity;
                 }
-                
-                $discount = $faker->randomElement([0, 5000, 10000, 0, 0]); 
+
+                $discount = $faker->randomElement([0, 5000, 10000, 0, 0]);
                 $tax = 0;
-                $grandTotal = max(0, ($totalPrice - $discount) + $tax); 
+                $grandTotal = max(0, ($totalPrice - $discount) + $tax);
+                $paidAmount = $grandTotal;
+                $changeAmount = 0;
 
                 $transactionData = [
-                    'invoice_number' => 'INV/' . now()->format('Ym') . '/' . Str::random(8),
-                    'customer_id' => $faker->randomElement(array_merge($customerIds, [null])), 
+                    'invoice_number' => 'INV/' . now()->format('Ym') . '/' . Str::upper(Str::random(8)),
+                    'customer_id' => $faker->randomElement(array_merge($customerIds, [null])),
                     'user_id' => $faker->randomElement($userIds),
                     'payment_method_id' => $faker->randomElement($paymentMethodIds),
                     'total_qty' => $totalQty,
@@ -69,8 +72,8 @@ class TransactionsSeeder extends Seeder
                     'discount' => $discount,
                     'tax' => $tax,
                     'grand_total' => $grandTotal,
-                    'paid_amount' => $grandTotal,
-                    'change_amount' => 0,
+                    'paid_amount' => $paidAmount,
+                    'change_amount' => $changeAmount,
                     'status' => 'paid',
                     'created_at' => $createdAt,
                     'updated_at' => $createdAt,
@@ -87,6 +90,6 @@ class TransactionsSeeder extends Seeder
             if (!empty($allTransactionDetails)) {
                 DB::table('transaction_details')->insert($allTransactionDetails);
             }
-        }); 
+        });
     }
 }

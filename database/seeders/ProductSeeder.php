@@ -2,24 +2,26 @@
 
 namespace Database\Seeders;
 
-use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Faker\Factory as Faker;
 
 class ProductSeeder extends Seeder
 {
-   public function run(): void
+    public function run(): void
     {
-        $products = [];
-        $faker = \Faker\Factory::create('id_ID');
+        $faker = Faker::create('id_ID');
 
         $categoryIds = DB::table('product_categories')->pluck('id')->toArray();
         $supplierIds = DB::table('suppliers')->pluck('id')->toArray();
         $userIds = DB::table('users')->pluck('id')->toArray();
 
+        $products = [];
+
         for ($i = 0; $i < 20; $i++) { 
-            $price = $faker->randomFloat(2, 5000, 50000);
-            $costPrice = $price * $faker->randomFloat(2, 0.6, 0.8);
+            // Gunakan integer, bukan float
+            $price = $faker->numberBetween(5000, 50000);
+            $costPrice = (int)($price * $faker->numberBetween(60, 80) / 100);
             $name = $faker->words(3, true);
             
             $products[] = [
