@@ -4,14 +4,49 @@ namespace App\Http\Controllers;
 
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\DataTables;
 
 class SupplierController extends Controller
 {
-    public function index()
-    {
-        $suppliers = Supplier::orderBy('id', 'desc')->paginate(10);
-        return view('suppliers.index', compact('suppliers'));
+  public function index()
+{
+    return view('suppliers.index');
+}
+
+public function getData(Request $request)
+{
+    if ($request->ajax()) {
+        $data = DB::table('suppliers')
+            ->select('id', 'name', 'contact', 'address')
+            ->orderBy('id', 'desc');
+
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->editColumn('address', function ($row) {
+                return $row->address;
+            })
+            ->addColumn('action', function ($row) {
+                $showUrl = route('suppliers.show', $row->id);
+                $editUrl = route('suppliers.edit', $row->id);
+                $deleteUrl = route('suppliers.destroy', $row->id);
+                $csrf = csrf_field();
+                $method = method_field('DELETE');
+
+                return "
+                    <a href='{$showUrl}' class='btn btn-info btn-sm'>Detail</a>
+                    <a href='{$editUrl}' class='btn btn-primary btn-sm'>Edit</a>
+                    <form action='{$deleteUrl}' method='POST' style='display:inline-block'>
+                        {$csrf}
+                        {$method}
+                        <button type='submit' class='btn btn-danger btn-sm' onclick=\"return confirm('Apakah Anda yakin ingin menghapus pemasok ini?')\">Hapus</button>
+                    </form>
+                ";
+            })
+            ->rawColumns(['action'])
+            ->make(true);
     }
+}
 
     public function create()
     {

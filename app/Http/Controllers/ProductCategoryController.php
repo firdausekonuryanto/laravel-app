@@ -4,13 +4,48 @@ namespace App\Http\Controllers;
 
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use Yajra\DataTables\DataTables; // <--- TAMBAHKAN INI
 
 class ProductCategoryController extends Controller
 {
-    public function index()
+   public function index()
     {
-        $categories = ProductCategory::orderBy('id', 'desc')->paginate(10);
-        return view('product-categories.index', compact('categories'));
+        // Cukup tampilkan view, data diambil lewat AJAX
+        return view('product-categories.index');
+    }
+
+    public function getData(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = ProductCategory::select(['id', 'name', 'description'])
+                ->orderBy('id', 'desc');
+
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->editColumn('description', function ($row) {
+                    // Potong deskripsi agar tidak terlalu panjang
+                    return $row->description;
+                })
+                ->addColumn('action', function ($row) {
+                    $showUrl = route('categories.show', $row->id);
+                    $editUrl = route('categories.edit', $row->id);
+                    $deleteUrl = route('categories.destroy', $row->id);
+                    $csrf = csrf_field();
+                    $method = method_field('DELETE');
+
+                    return "
+                        <a href='{$showUrl}' class='btn btn-info btn-sm'>Detail</a>
+                        <a href='{$editUrl}' class='btn btn-primary btn-sm'>Edit</a>
+                        <form action='{$deleteUrl}' method='POST' style='display:inline-block'>
+                            {$csrf}
+                            {$method}
+                            <button class='btn btn-danger btn-sm' onclick=\"return confirm('Hapus kategori ini?')\">Hapus</button>
+                        </form>
+                    ";
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
     }
 
     public function create()

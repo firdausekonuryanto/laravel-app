@@ -1,70 +1,132 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 margin-tb">
-                <div class="pull-left">
-                    <h2>Manajemen Kategori Produk</h2>
-                </div>
-                <div class="pull-right mb-3">
-                    <a class="btn btn-success" href="{{ route('categories.create') }}"> Tambah Kategori Baru</a>
-                </div>
-            </div>
-        </div>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
 
-        @if ($message = Session::get('success'))
-            <div class="alert alert-success mt-3">
-                <p>{{ $message }}</p>
-            </div>
+        table.dataTable {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border-color: #333;
+        }
+
+        table.dataTable thead th {
+            background-color: #222;
+            color: #fff;
+        }
+
+        table.dataTable tbody tr:nth-child(even) {
+            background-color: #1b1b1b;
+        }
+
+        table.dataTable tbody tr:nth-child(odd) {
+            background-color: #141414;
+        }
+
+        table.dataTable tbody tr:hover {
+            background-color: #2a2a2a;
+        }
+
+        .dataTables_wrapper .dataTables_filter input,
+        .dataTables_wrapper .dataTables_length select {
+            background-color: #1b1b1b;
+            color: #e0e0e0;
+            border: 1px solid #333;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            background-color: #2a2a2a;
+            color: #e0e0e0 !important;
+            border: 1px solid #333;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: #007bff !important;
+            color: #fff !important;
+        }
+
+        .btn {
+            border: none;
+        }
+
+        .btn-info {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+    </style>
+
+    <div class="">
+        <h2>Manajemen Kategori Produk</h2>
+        <a href="{{ route('categories.create') }}" class="btn btn-success mb-3">Tambah Kategori Baru</a>
+
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        @if ($message = Session::get('error'))
-            <div class="alert alert-danger mt-3">
-                <p>{{ $message }}</p>
-            </div>
-        @endif
-
-        <table class="table table-bordered table-striped mt-3">
+        <table class="table table-bordered yajra-datatable">
             <thead>
                 <tr>
                     <th>No</th>
                     <th>Nama Kategori</th>
                     <th>Deskripsi</th>
-                    <th width="200px">Aksi</th>
+                    <th width="180px">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse ($categories as $category)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $category->name }}</td>
-                        <td>{{ Str::limit($category->description, 50) }}</td>
-                        <td>
-                            <form action="{{ route('categories.destroy', $category->id) }}" method="POST">
-                                <a class="btn btn-info btn-sm"
-                                    href="{{ route('categories.show', $category->id) }}">Detail</a>
-                                <a class="btn btn-primary btn-sm"
-                                    href="{{ route('categories.edit', $category->id) }}">Edit</a>
-
-                                @csrf
-                                @method('DELETE')
-
-                                <button type="submit" class="btn btn-danger btn-sm"
-                                    onclick="return confirm('Apakah Anda yakin ingin menghapus kategori: {{ $category->name }}? Ini akan mempengaruhi produk yang terkait.')">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="text-center">Belum ada data kategori.</td>
-                    </tr>
-                @endforelse
-            </tbody>
+            <tbody></tbody>
         </table>
-
-        <div class="d-flex justify-content-center">
-            {{ $categories->links() }}
-        </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script type="text/javascript">
+        $(function() {
+            $('.yajra-datatable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: "{{ route('categories.data') }}",
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'name',
+                        name: 'name'
+                    },
+                    {
+                        data: 'description',
+                        name: 'description'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    },
+                ]
+            });
+        });
+    </script>
+@endpush

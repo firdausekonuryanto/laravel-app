@@ -7,17 +7,63 @@ use App\Events\ProductCreated;
 use App\Models\ProductCategory;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\DataTables; // <--- TAMBAHKAN INI
 
 class ProductController extends Controller
 {
-    public function index()
-    {
-        $products = Product::with(['category', 'creator'])
-            ->orderBy('id', 'desc')
-            ->get();
+   public function index()
+{
+    return view('products.index');
+}
 
-        return view('products.index', compact('products'));
+public function getData(Request $request)
+{
+    if ($request->ajax()) {
+        $data = DB::table('products')
+            ->leftJoin('product_categories', 'products.category_id', '=', 'product_categories.id')
+            ->leftJoin('users', 'products.created_by', '=', 'users.id')
+            ->select(
+                'products.id',
+                'products.sku',
+                'products.name',
+                'product_categories.name as category_name',
+                'products.price',
+                'products.stock',
+                'products.unit'
+            )
+            ->orderBy('products.id', 'desc');
+
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->editColumn('price', function ($row) {
+                return 'Rp' . number_format($row->price, 0, ',', '.');
+            })
+            ->editColumn('stock', function ($row) {
+                $badgeClass = $row->stock > 10 ? 'bg-success' : 'bg-danger';
+                return "<span class='badge {$badgeClass}'>{$row->stock}</span>";
+            })
+            ->addColumn('action', function ($row) {
+                $showUrl = route('products.show', $row->id);
+                $editUrl = route('products.edit', $row->id);
+                $deleteUrl = route('products.destroy', $row->id);
+                $csrf = csrf_field();
+                $method = method_field('DELETE');
+
+                return "
+                    <a href='{$showUrl}' class='btn btn-info btn-sm'>Detail</a>
+                    <a href='{$editUrl}' class='btn btn-primary btn-sm'>Edit</a>
+                    <form action='{$deleteUrl}' method='POST' style='display:inline-block'>
+                        {$csrf}
+                        {$method}
+                        <button type='submit' class='btn btn-danger btn-sm' onclick=\"return confirm('Apakah Anda yakin ingin menghapus produk ini?')\">Hapus</button>
+                    </form>
+                ";
+            })
+            ->rawColumns(['action', 'stock'])
+            ->make(true);
     }
+}
 
     public function create()
     {

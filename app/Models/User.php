@@ -6,10 +6,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany; // Import HasMany
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -44,5 +44,16 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // ✅ Definisi Relasi: User memiliki banyak transaksi
+    /**
+     * Get the transactions created by the user.
+     */
+    public function transactions(): HasMany
+    {
+        // Secara default akan mencari foreign key 'user_id' di tabel 'transactions',
+        // yang sesuai dengan skema umum.
+        return $this->hasMany(Transactions::class, 'user_id');
     }
 }

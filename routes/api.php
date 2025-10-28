@@ -2,14 +2,16 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\ProductController;
-use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\ProductApiController;
+use App\Http\Controllers\Api\TransactionApiController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
 
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/transactions', [TransactionController::class, 'index']);
-Route::post('/transactions', [TransactionController::class, 'store']);
+Route::get('/products', [ProductApiController::class, 'index']);
+Route::get('/transactions', [TransactionApiController::class, 'index']);
+Route::get('/transactions/create', [TransactionApiController::class, 'create']);
+Route::get('/transactions/store', [TransactionApiController::class, 'store']);
+Route::post('/transactions', [TransactionApiController::class, 'store']);
