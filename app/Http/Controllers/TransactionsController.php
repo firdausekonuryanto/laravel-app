@@ -70,48 +70,36 @@ class TransactionsController extends Controller
     }
 
     public function getDataProduct(Request $request)
-{
-    if ($request->ajax()) {
-        $data = DB::table('products')
-            ->leftJoin('product_categories', 'products.category_id', '=', 'product_categories.id')
-            ->select(
-                'products.id',
-                'products.sku',
-                'products.name',
-                'product_categories.name as category_name',
-                'products.price',
-                'products.stock',
-                'products.unit'
-            )
-            ->orderBy('products.id', 'desc');
+    {
+        if ($request->ajax()) {
+            $data = DB::table('products')->leftJoin('product_categories', 'products.category_id', '=', 'product_categories.id')->select('products.id', 'products.sku', 'products.name', 'product_categories.name as category_name', 'products.price', 'products.stock', 'products.unit')->orderBy('products.id', 'desc');
 
-        return DataTables::of($data)
-            ->addIndexColumn()
-            ->editColumn('price', function ($row) {
-                return 'Rp' . number_format($row->price, 0, ',', '.');
-            })
-            ->editColumn('stock', function ($row) {
-                $badgeClass = $row->stock > 10 ? 'bg-success' : 'bg-danger';
-                return "<span class='badge {$badgeClass}'>{$row->stock}</span>";
-            })
-            ->addColumn('action', function ($row) {
-                // Tombol tambah ke keranjang
-                return "
-                    <button 
-                        type='button' 
-                        class='btn btn-success btn-sm add-to-cart' 
-                        data-id='{$row->id}' 
-                        data-name='{$row->name}' 
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->editColumn('price', function ($row) {
+                    return 'Rp' . number_format($row->price, 0, ',', '.');
+                })
+                ->editColumn('stock', function ($row) {
+                    $badgeClass = $row->stock > 10 ? 'bg-success' : 'bg-danger';
+                    return "<span class='badge {$badgeClass}'>{$row->stock}</span>";
+                })
+                ->addColumn('action', function ($row) {
+                    // Tombol tambah ke keranjang
+                    return "
+                    <button
+                        type='button'
+                        class='btn btn-success btn-sm add-to-cart'
+                        data-id='{$row->id}'
+                        data-name='{$row->name}'
                         data-price='{$row->price}'>
                         ➕ Add to Cart
                     </button>
                 ";
-            })
-            ->rawColumns(['action', 'stock'])
-            ->make(true);
+                })
+                ->rawColumns(['action', 'stock'])
+                ->make(true);
+        }
     }
-}
-
 
     public function create()
     {

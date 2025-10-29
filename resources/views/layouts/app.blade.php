@@ -34,8 +34,7 @@
         <!-- partial:../../partials/_sidebar.html -->
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-                <a class="sidebar-brand brand-logo" href="../../index.html"><img
-                        src="{{ asset('assets/images/logo.svg') }}" alt="logo" /></a>
+                <a class="sidebar-brand brand-logo text-light" href="../../index.html">P O S Record</a>
                 <a class="sidebar-brand brand-logo-mini" href="../../index.html"><img
                         src="{{ asset('assets/images/logo-mini.svg') }}" alt="logo" /></a>
             </div>
@@ -49,8 +48,8 @@
                                 <span class="count bg-success"></span>
                             </div>
                             <div class="profile-name">
-                                <h5 class="mb-0 font-weight-normal">Henry Klein</h5>
-                                <span>Gold Member</span>
+                                <h5 class="mb-0 font-weight-normal">{{ Auth::user()->name }}</h5>
+                                <span>{{ Auth::user()->role }}</span>
                             </div>
                         </div>
                         <a href="#" id="profile-dropdown" data-toggle="dropdown"><i
@@ -374,7 +373,7 @@
                                 <div class="navbar-profile">
                                     <img class="img-xs rounded-circle"
                                         src="{{ asset('assets/images/faces/face15.jpg') }}" alt="">
-                                    <p class="mb-0 d-none d-sm-block navbar-profile-name">Henry Klein</p>
+                                    <p class="mb-0 d-none d-sm-block navbar-profile-name">{{ Auth::user()->name }}</p>
                                     <i class="mdi mdi-menu-down d-none d-sm-block"></i>
                                 </div>
                             </a>
@@ -400,7 +399,17 @@
                                         </div>
                                     </div>
                                     <div class="preview-item-content">
-                                        <p class="preview-subject mb-1">Log out</p>
+
+
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST"
+                                            style="margin:0; display:inline;">
+                                            @csrf
+                                            <p class="preview-subject mb-1" style="cursor:pointer; margin:0;"
+                                                onclick="event.preventDefault(); this.closest('form').submit();">
+                                                Logout
+                                            </p>
+                                        </form>
+
                                     </div>
                                 </a>
                                 <div class="dropdown-divider"></div>

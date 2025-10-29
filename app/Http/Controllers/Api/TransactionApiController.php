@@ -10,22 +10,19 @@ use Illuminate\Support\Str;
 
 class TransactionApiController extends Controller
 {
-  // Versi Sederhana Tanpa Map (Output JSON akan memiliki objek 'customer' dan 'payment_method')
-public function index()
-{
-    $transactions = Transactions::with(['customer:id,name', 'paymentMethod:id,name','details.product:id,name','user:id,name'])
-        ->select([
-            'id', 'invoice_number', 'customer_id', 'payment_method_id','user_id',
-            'total_qty', 'grand_total', 'paid_amount', 'change_amount', 'status','total_price','discount', 'created_at'
-        ])
-        ->orderByDesc('created_at')
-        ->get();
+    // Versi Sederhana Tanpa Map (Output JSON akan memiliki objek 'customer' dan 'payment_method')
+    public function index()
+    {
+        $transactions = Transactions::with(['customer:id,name', 'paymentMethod:id,name', 'details.product:id,name', 'user:id,name'])
+            ->select(['id', 'invoice_number', 'customer_id', 'payment_method_id', 'user_id', 'total_qty', 'grand_total', 'paid_amount', 'change_amount', 'status', 'total_price', 'discount', 'created_at'])
+            ->orderByDesc('created_at')
+            ->get();
 
-    return response()->json([
-        'success' => true,
-        'data' => $transactions,
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'data' => $transactions,
+        ]);
+    }
 
     public function create()
     {
@@ -68,7 +65,9 @@ public function index()
             // Hitung total harga & qty
             foreach ($request->products as $item) {
                 $product = DB::table('products')->find($item['product_id']);
-                if (!$product) continue;
+                if (!$product) {
+                    continue;
+                }
 
                 $subtotal = $product->price * $item['quantity'];
 
@@ -118,15 +117,9 @@ public function index()
         });
 
         // Ambil data transaksi lengkap untuk dikirim ke client
-        $transaction = DB::table('transactions')
-            ->where('id', $transactionId)
-            ->first();
+        $transaction = DB::table('transactions')->where('id', $transactionId)->first();
 
-        $details = DB::table('transaction_details')
-            ->join('products', 'transaction_details.product_id', '=', 'products.id')
-            ->select('transaction_details.*', 'products.name as product_name')
-            ->where('transaction_id', $transactionId)
-            ->get();
+        $details = DB::table('transaction_details')->join('products', 'transaction_details.product_id', '=', 'products.id')->select('transaction_details.*', 'products.name as product_name')->where('transaction_id', $transactionId)->get();
 
         return response()->json([
             'success' => true,
