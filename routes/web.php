@@ -13,11 +13,14 @@ use App\Http\Controllers\LoginController;
 use App\Models\Supplier;
 use App\Models\Transactions;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
+// --- Authentication Routes ---
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// --- Authenticated Routes Group ---
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard/data', [DashboardController::class, 'getData'])->name('dashboard.data');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
@@ -48,4 +51,21 @@ Route::middleware(['auth'])->group(function () {
 
     // Transaction Details
     Route::resource('transaction-details', TransactionDetailsController::class);
+});
+
+// --- Fallback Route (HARUS diletakkan paling akhir) ---
+/*
+| Rute ini akan menangkap semua permintaan yang tidak cocok dengan rute
+| yang didefinisikan di atasnya.
+*/
+Route::fallback(function () {
+    // Cek apakah user sudah login
+    
+    if (Auth::check()) {
+        // Jika sudah login, redirect ke dashboard
+        return redirect()->route('dashboard.index');
+    } else {
+        // Jika belum login, redirect ke halaman login
+        return redirect()->route('login');
+    }
 });
