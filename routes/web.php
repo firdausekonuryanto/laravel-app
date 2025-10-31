@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('products', ProductController::class);
 
     // Transactions
+    Route::get('/transactions/{id}/print', [TransactionsController::class, 'print'])->name('transactions.print');
     Route::get('transactions/data', [TransactionsController::class, 'getData'])->name('transactions.data');
     Route::get('transactions/data-product', [TransactionsController::class, 'getDataProduct'])->name('transactions.dataProduct');
     Route::resource('transactions', TransactionsController::class);

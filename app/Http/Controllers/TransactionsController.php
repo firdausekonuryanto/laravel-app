@@ -325,4 +325,11 @@ class TransactionsController extends Controller
 
         return redirect()->route('transactions.index')->with('success', 'Dummy transactions generated successfully!');
     }
+
+    public function print($id)
+    {
+        $transaction = Transactions::with(['customer', 'details.product'])->findOrFail($id);
+
+        return view('transactions.print', compact('transaction'));
+    }
 }
