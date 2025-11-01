@@ -72,6 +72,7 @@
             color: white;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="">
         <div class="">
@@ -230,18 +231,45 @@
             // Event listener: transaksi baru
             channel.bind("transaction.created", function(data) {
                 const transaction = data.transaction;
-
                 if (!transaction) return;
 
                 console.log("💰 Transaksi baru diterima:", transaction);
-                alert(`Transaksi baru masuk: ${transaction.invoice_number}`);
 
-                // Reload DataTable jika ada di halaman
+                // 🔔 Tampilkan notifikasi Toast SweetAlert2
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: "top-end",
+                    showConfirmButton: false,
+                    timer: 7000,
+                    timerProgressBar: true,
+                    background: "#1e1e1e",
+                    color: "#fff",
+                    customClass: {
+                        popup: "shadow-lg rounded-3xl",
+                    },
+                });
+
+                // Format waktu lokal
+                const time = new Date(transaction.created_at).toLocaleTimeString("id-ID");
+                const amount = parseInt(transaction.amount || 0).toLocaleString("id-ID");
+
+                Toast.fire({
+                    icon: "success",
+                    title: "💰 Transaksi Baru",
+                    html: `
+                    <b>Kasir:</b> ${transaction.cashier_name || "Tidak diketahui"}<br>
+                    <b>Nomor Invoice:</b> ${transaction.invoice_number || "-"}<br>
+                    <b>Jumlah:</b> Rp ${amount}<br>
+                    <b>Waktu:</b> ${time}
+                `,
+                });
+
+                // 🔄 Reload DataTable jika ada
                 const dataTable = $(".yajra-datatable").DataTable?.();
                 if (dataTable) dataTable.ajax.reload();
             });
 
-            // Log status koneksi (opsional)
+            // Log status koneksi
             pusher.connection.bind("state_change", function(states) {
                 console.log(`Pusher status: ${states.previous} -> ${states.current}`);
             });
