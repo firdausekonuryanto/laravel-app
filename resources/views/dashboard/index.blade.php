@@ -71,6 +71,47 @@
             background-color: #3498db;
             color: white;
         }
+
+        div.dataTables_length {
+            float: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            /* margin-bottom: 10px; */
+        }
+
+        div.dataTables_length label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #ddd;
+        }
+
+        div.dataTables_length select {
+            background-color: #1e1e1e;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 3px 6px;
+        }
+
+        div.dataTables_filter {
+            float: right;
+            text-align: right;
+        }
+
+        div.dataTables_filter input {
+            background-color: #1e1e1e;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+
+        div.dataTables_wrapper div.dataTables_length,
+        div.dataTables_wrapper div.dataTables_filter {
+            margin-bottom: 1rem;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
