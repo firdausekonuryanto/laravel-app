@@ -210,6 +210,48 @@
 
         </div>
     </div>
+
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script>
+        (function() {
+            // Aktifkan log hanya di mode development
+            const isDev = "{{ app()->environment('local') }}" === "1";
+            Pusher.logToConsole = isDev;
+
+            // Inisialisasi Pusher
+            const pusher = new Pusher("{{ env('PUSHER_APP_KEY') }}", {
+                cluster: "{{ env('PUSHER_APP_CLUSTER') }}",
+                forceTLS: true,
+            });
+
+            // Subscribe ke channel 'transactions'
+            const channel = pusher.subscribe("transactions");
+
+            // Event listener: transaksi baru
+            channel.bind("transaction.created", function(data) {
+                const transaction = data.transaction;
+
+                if (!transaction) return;
+
+                console.log("💰 Transaksi baru diterima:", transaction);
+                alert(`Transaksi baru masuk: ${transaction.invoice_number}`);
+
+                // Reload DataTable jika ada di halaman
+                const dataTable = $(".yajra-datatable").DataTable?.();
+                if (dataTable) dataTable.ajax.reload();
+            });
+
+            // Log status koneksi (opsional)
+            pusher.connection.bind("state_change", function(states) {
+                console.log(`Pusher status: ${states.previous} -> ${states.current}`);
+            });
+
+            // Log error koneksi
+            pusher.connection.bind("error", function(err) {
+                console.error("Pusher error:", err);
+            });
+        })();
+    </script>
 @endsection
 
 @push('scripts')
