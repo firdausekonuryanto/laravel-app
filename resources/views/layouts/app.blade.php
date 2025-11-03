@@ -24,6 +24,118 @@
             color: white !important
         }
     </style>
+
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        table.dataTable {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border-color: #333;
+        }
+
+        table.dataTable thead th {
+            background-color: #222;
+            color: #fff;
+        }
+
+        table.dataTable tbody tr:nth-child(even) {
+            background-color: #1b1b1b;
+        }
+
+        table.dataTable tbody tr:nth-child(odd) {
+            background-color: #141414;
+        }
+
+        table.dataTable tbody tr:hover {
+            background-color: #2a2a2a;
+        }
+
+        .dataTables_wrapper .dataTables_filter input,
+        .dataTables_wrapper .dataTables_length select {
+            background-color: #1b1b1b;
+            color: #e0e0e0;
+            border: 1px solid #333;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            background-color: #2a2a2a;
+            color: #e0e0e0 !important;
+            border: 1px solid #333;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: #007bff !important;
+            color: #fff !important;
+        }
+
+        .btn {
+            border: none;
+        }
+
+        .btn-info {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        div.dataTables_length {
+            float: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        div.dataTables_length label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #ddd;
+        }
+
+        div.dataTables_length select {
+            background-color: #1e1e1e;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 3px 6px;
+        }
+
+        div.dataTables_filter {
+            float: right;
+            text-align: right;
+        }
+
+        div.dataTables_filter input {
+            background-color: #1e1e1e;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+
+        div.dataTables_wrapper div.dataTables_length,
+        div.dataTables_wrapper div.dataTables_filter {
+            margin-bottom: 1rem;
+        }
+    </style>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 

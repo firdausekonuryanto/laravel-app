@@ -77,7 +77,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            /* margin-bottom: 10px; */
         }
 
         div.dataTables_length label {
@@ -292,13 +291,13 @@
 
                 // Format waktu lokal
                 const time = new Date(transaction.created_at).toLocaleTimeString("id-ID");
-                const amount = parseInt(transaction.amount || 0).toLocaleString("id-ID");
+                const amount = parseInt(transaction.total_price || 0).toLocaleString("id-ID");
 
                 Toast.fire({
                     icon: "success",
                     title: "💰 Transaksi Baru",
                     html: `
-                    <b>Kasir:</b> ${transaction.cashier_name || "Tidak diketahui"}<br>
+                    <b>Kasir:</b> ${transaction.user?.name || "Tidak diketahui"}<br>
                     <b>Nomor Invoice:</b> ${transaction.invoice_number || "-"}<br>
                     <b>Jumlah:</b> Rp ${amount}<br>
                     <b>Waktu:</b> ${time}

@@ -15,18 +15,17 @@ class TransactionCreated implements ShouldBroadcast
 
     public function __construct($transaction)
     {
+        $transaction->load('user');
         $this->transaction = $transaction;
     }
 
     public function broadcastOn()
     {
-        // pastikan PUBLIC channel (bukan private)
         return new Channel('transactions');
     }
 
     public function broadcastAs()
     {
-        // harus SAMA dengan yang kamu bind di JS
         return 'transaction.created';
     }
 }
