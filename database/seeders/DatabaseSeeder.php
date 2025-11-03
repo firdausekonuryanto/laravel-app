@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
 
         for ($i = 0; $i < 9; $i++) {
             $name = $faker->name;
-            $role = $faker->randomElement(['kasir', 'owner']);
+            $role = $faker->randomElement(['kasir', 'manajer']);
             $users[] = [
                 'username' => strtolower(Str::slug($name, '')) . $faker->unique()->randomNumber(3),
                 'password' => Hash::make('password'),
@@ -45,5 +45,7 @@ class DatabaseSeeder extends Seeder
         $userIds = DB::table('users')->pluck('id')->toArray();
 
         $this->call([ProductCategorySeeder::class, SupplierSeeder::class, CustomersSeeder::class, PaymentMethodsSeeder::class, ProductSeeder::class, TransactionsSeeder::class]);
+        $this->call(RolePermissionSeeder::class);
+
     }
 }

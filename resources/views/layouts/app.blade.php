@@ -248,14 +248,17 @@
                         </ul>
                     </div>
                 </li>
-                <li class="nav-item menu-items">
-                    <a class="nav-link" href="{{ route('transactions.index') }}">
-                        <span class="menu-icon">
-                            <i class="mdi mdi-playlist-play"></i>
-                        </span>
-                        <span class="menu-title">Transactions</span>
-                    </a>
-                </li>
+                @can('read.transactions')
+                    <li class="nav-item menu-items">
+                        <a class="nav-link" href="{{ route('transactions.index') }}">
+                            <span class="menu-icon">
+                                <i class="mdi mdi-playlist-play"></i>
+                            </span>
+                            <span class="menu-title">Transactions</span>
+                        </a>
+                    </li>
+                @endcan
+
                 {{-- <li class="nav-item menu-items">
                     <a class="nav-link" href="../../pages/tables/basic-table.html">
                         <span class="menu-icon">

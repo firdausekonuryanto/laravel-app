@@ -10,75 +10,52 @@ use Yajra\DataTables\DataTables;
 
 class DashboardController extends Controller
 {
-  public function index()
-{
-    $title = 'Dashboard Admin';
+    public function __construct()
+    {
+        // $this->middleware('permission:read-dashboard')->only('index');
+    }
 
-    // Hari ini
-    $todayRevenue = Transactions::whereDate('created_at', today())->sum('grand_total');
-    $todayTrans = Transactions::whereDate('created_at', today())->count();
+    public function index()
+    {
+        $title = 'Dashboard Admin';
 
-    // Bulan ini
-    $monthRevenue = Transactions::whereMonth('created_at', now()->month)
-        ->whereYear('created_at', now()->year)
-        ->sum('grand_total');
-    $monthTrans = Transactions::whereMonth('created_at', now()->month)
-        ->whereYear('created_at', now()->year)
-        ->count();
+        // Hari ini
+        $todayRevenue = Transactions::whereDate('created_at', today())->sum('grand_total');
+        $todayTrans = Transactions::whereDate('created_at', today())->count();
 
-    // Tahun ini
-    $yearRevenue = Transactions::whereYear('created_at', now()->year)
-        ->sum('grand_total');
-    $yearTrans = Transactions::whereYear('created_at', now()->year)
-        ->count();
+        // Bulan ini
+        $monthRevenue = Transactions::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->sum('grand_total');
+        $monthTrans = Transactions::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
 
-    // ======================
-    // 📊 Grafik 1: Pendapatan per bulan (12 bulan)
-    // ======================
-    $monthlyRevenue = Transactions::select(
-            DB::raw('MONTH(created_at) as month'),
-            DB::raw('SUM(grand_total) as total')
-        )
-        ->whereYear('created_at', now()->year)
-        ->groupBy('month')
-        ->orderBy('month', 'ASC')
-        ->get();
+        // Tahun ini
+        $yearRevenue = Transactions::whereYear('created_at', now()->year)->sum('grand_total');
+        $yearTrans = Transactions::whereYear('created_at', now()->year)->count();
 
-    $labelsMonthly = collect(range(1, 12))->map(fn($m) => Carbon::create()->month($m)->translatedFormat('F'));
-    $totalsMonthly = $labelsMonthly->map(function ($label, $index) use ($monthlyRevenue) {
-        $data = $monthlyRevenue->firstWhere('month', $index + 1);
-        return $data ? (float) $data->total : 0;
-    });
+        // ======================
+        // 📊 Grafik 1: Pendapatan per bulan (12 bulan)
+        // ======================
+        $monthlyRevenue = Transactions::select(DB::raw('MONTH(created_at) as month'), DB::raw('SUM(grand_total) as total'))->whereYear('created_at', now()->year)->groupBy('month')->orderBy('month', 'ASC')->get();
 
-    // ======================
-    // 📊 Grafik 2: Pendapatan per hari (30 hari terakhir)
-    // ======================
-    $dailyRevenue = Transactions::select(
-            DB::raw('DATE(created_at) as date'),
-            DB::raw('SUM(grand_total) as total')
-        )
-        ->whereBetween('created_at', [now()->subDays(30), now()])
-        ->groupBy('date')
-        ->orderBy('date', 'ASC')
-        ->get();
+        $labelsMonthly = collect(range(1, 12))->map(fn($m) => Carbon::create()->month($m)->translatedFormat('F'));
+        $totalsMonthly = $labelsMonthly->map(function ($label, $index) use ($monthlyRevenue) {
+            $data = $monthlyRevenue->firstWhere('month', $index + 1);
+            return $data ? (float) $data->total : 0;
+        });
 
-    $labelsDaily = $dailyRevenue->pluck('date')->map(fn($d) => Carbon::parse($d)->translatedFormat('d M'));
-    $totalsDaily = $dailyRevenue->pluck('total');
+        // ======================
+        // 📊 Grafik 2: Pendapatan per hari (30 hari terakhir)
+        // ======================
+        $dailyRevenue = Transactions::select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(grand_total) as total'))
+            ->whereBetween('created_at', [now()->subDays(30), now()])
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->get();
 
-    return view('dashboard.index', compact(
-        'title',
-        'todayRevenue',
-        'monthRevenue',
-        'yearRevenue',
-        'todayTrans',
-        'monthTrans',
-        'yearTrans',
-        'labelsMonthly',
-        'totalsMonthly',
-        'labelsDaily',
-        'totalsDaily'
-    ));
-}
+        $labelsDaily = $dailyRevenue->pluck('date')->map(fn($d) => Carbon::parse($d)->translatedFormat('d M'));
+        $totalsDaily = $dailyRevenue->pluck('total');
+
+        return view('dashboard.index', compact('title', 'todayRevenue', 'monthRevenue', 'yearRevenue', 'todayTrans', 'monthTrans', 'yearTrans', 'labelsMonthly', 'totalsMonthly', 'labelsDaily', 'totalsDaily'));
+    }
     public function getData(Request $request)
     {
         if ($request->ajax()) {

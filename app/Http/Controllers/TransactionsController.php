@@ -12,9 +12,14 @@ use Yajra\DataTables\DataTables; // <--- TAMBAHKAN INI
 
 class TransactionsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->middleware('permission:transactions.create')->only('create', 'store');
+        $this->middleware('permission:transactions.read')->only('index', 'getData', 'getDataProduct','show');
+        $this->middleware('permission:transactions.update')->only('edit', 'update');
+        $this->middleware('permission:transactions.delete')->only('destroy');
+    }
+
     public function index()
     {
         // Cukup tampilkan view, data akan diambil oleh getData()

@@ -220,6 +220,12 @@
                     </div>
                 </div>
             </div>
+            ssssssssssssss
+            <ul>
+                @foreach (auth()->user()->getAllPermissions() as $perm)
+                    <li>{{ $perm->name }}</li>
+                @endforeach
+            </ul>
 
             {{-- 🧾 Last Transactions Table --}}
             <div class="row ">
