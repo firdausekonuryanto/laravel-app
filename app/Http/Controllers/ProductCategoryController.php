@@ -8,17 +8,23 @@ use Yajra\DataTables\DataTables; // <--- TAMBAHKAN INI
 
 class ProductCategoryController extends Controller
 {
-   public function index()
+    public function __construct()
     {
-        // Cukup tampilkan view, data diambil lewat AJAX
+        $this->middleware('permission:customers.create')->only('create', 'store');
+        $this->middleware('permission:customers.read')->only('index', 'getData');
+        $this->middleware('permission:customers.update')->only('edit', 'update');
+        $this->middleware('permission:customers.delete')->only('destroy');
+    }
+
+    public function index()
+    {
         return view('product-categories.index');
     }
 
     public function getData(Request $request)
     {
         if ($request->ajax()) {
-            $data = ProductCategory::select(['id', 'name', 'description'])
-                ->orderBy('id', 'desc');
+            $data = ProductCategory::select(['id', 'name', 'description'])->orderBy('id', 'desc');
 
             return DataTables::of($data)
                 ->addIndexColumn()

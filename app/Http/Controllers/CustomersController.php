@@ -8,36 +8,56 @@ use Yajra\DataTables\DataTables;
 
 class CustomersController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:categories.create')->only('create', 'store');
+        $this->middleware('permission:categories.read')->only('index', 'getData');
+        $this->middleware('permission:categories.update')->only('edit', 'update');
+        $this->middleware('permission:categories.delete')->only('destroy');
+    }
+
     public function index()
     {
         return view('customers.index');
     }
-    public function getData(Request $request)
-{
-    if ($request->ajax()) {
-        $data = Customers::select(['id', 'name', 'phone', 'email', 'address'])
-            ->orderBy('id', 'desc');
 
-        return DataTables::of($data)
-            ->addIndexColumn()
-            ->addColumn('action', function($row){
-                $btn = '
-                    <a href="'.route('customers.show', $row->id).'" class="btn btn-info btn-sm">Detail</a>
-                    <a href="'.route('customers.edit', $row->id).'" class="btn btn-primary btn-sm">Edit</a>
-                    <form action="'.route('customers.destroy', $row->id).'" method="POST" style="display:inline;">
-                        '.csrf_field().method_field('DELETE').'
-                        <button type="submit" class="btn btn-danger btn-sm" 
-                            onclick="return confirm(\'Apakah Anda yakin ingin menghapus pelanggan '.$row->name.'?\')">Hapus</button>
+    public function getData(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = Customers::select(['id', 'name', 'phone', 'email', 'address'])->orderBy('id', 'desc');
+
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('action', function ($row) {
+                    $btn =
+                        '
+                    <a href="' .
+                        route('customers.show', $row->id) .
+                        '" class="btn btn-info btn-sm">Detail</a>
+                    <a href="' .
+                        route('customers.edit', $row->id) .
+                        '" class="btn btn-primary btn-sm">Edit</a>
+                    <form action="' .
+                        route('customers.destroy', $row->id) .
+                        '" method="POST" style="display:inline;">
+                        ' .
+                        csrf_field() .
+                        method_field('DELETE') .
+                        '
+                        <button type="submit" class="btn btn-danger btn-sm"
+                            onclick="return confirm(\'Apakah Anda yakin ingin menghapus pelanggan ' .
+                        $row->name .
+                        '?\')">Hapus</button>
                     </form>';
-                return $btn;
-            })
-            ->editColumn('address', function($row){
-                return \Illuminate\Support\Str::limit($row->address, 50);
-            })
-            ->rawColumns(['action'])
-            ->make(true);
+                    return $btn;
+                })
+                ->editColumn('address', function ($row) {
+                    return \Illuminate\Support\Str::limit($row->address, 50);
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
     }
-}
 
     public function create()
     {

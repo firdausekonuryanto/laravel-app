@@ -9,31 +9,37 @@ use Yajra\DataTables\DataTables;
 
 class SupplierController extends Controller
 {
-  public function index()
-{
-    return view('suppliers.index');
-}
+    public function __construct()
+    {
+        $this->middleware('permission:suppliers.create')->only('create', 'store');
+        $this->middleware('permission:suppliers.read')->only('index', 'getData');
+        $this->middleware('permission:suppliers.update')->only('edit', 'update');
+        $this->middleware('permission:suppliers.delete')->only('destroy');
+    }
 
-public function getData(Request $request)
-{
-    if ($request->ajax()) {
-        $data = DB::table('suppliers')
-            ->select('id', 'name', 'contact', 'address')
-            ->orderBy('id', 'desc');
+    public function index()
+    {
+        return view('suppliers.index');
+    }
 
-        return DataTables::of($data)
-            ->addIndexColumn()
-            ->editColumn('address', function ($row) {
-                return $row->address;
-            })
-            ->addColumn('action', function ($row) {
-                $showUrl = route('suppliers.show', $row->id);
-                $editUrl = route('suppliers.edit', $row->id);
-                $deleteUrl = route('suppliers.destroy', $row->id);
-                $csrf = csrf_field();
-                $method = method_field('DELETE');
+    public function getData(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = DB::table('suppliers')->select('id', 'name', 'contact', 'address')->orderBy('id', 'desc');
 
-                return "
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->editColumn('address', function ($row) {
+                    return $row->address;
+                })
+                ->addColumn('action', function ($row) {
+                    $showUrl = route('suppliers.show', $row->id);
+                    $editUrl = route('suppliers.edit', $row->id);
+                    $deleteUrl = route('suppliers.destroy', $row->id);
+                    $csrf = csrf_field();
+                    $method = method_field('DELETE');
+
+                    return "
                     <a href='{$showUrl}' class='btn btn-info btn-sm'>Detail</a>
                     <a href='{$editUrl}' class='btn btn-primary btn-sm'>Edit</a>
                     <form action='{$deleteUrl}' method='POST' style='display:inline-block'>
@@ -42,11 +48,11 @@ public function getData(Request $request)
                         <button type='submit' class='btn btn-danger btn-sm' onclick=\"return confirm('Apakah Anda yakin ingin menghapus pemasok ini?')\">Hapus</button>
                     </form>
                 ";
-            })
-            ->rawColumns(['action'])
-            ->make(true);
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
     }
-}
 
     public function create()
     {

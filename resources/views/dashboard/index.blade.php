@@ -220,12 +220,13 @@
                     </div>
                 </div>
             </div>
-            ssssssssssssss
+
+            {{-- <p>Role: {{ implode(', ', auth()->user()->getRoleNames()->toArray()) }}</p>
             <ul>
                 @foreach (auth()->user()->getAllPermissions() as $perm)
                     <li>{{ $perm->name }}</li>
                 @endforeach
-            </ul>
+            </ul> --}}
 
             {{-- 🧾 Last Transactions Table --}}
             <div class="row ">
