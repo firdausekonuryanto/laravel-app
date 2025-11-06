@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Events\TransactionCreated;
+use App\Models\Product;
 
 class TransactionApiController extends Controller
 {
@@ -31,23 +32,30 @@ class TransactionApiController extends Controller
         ]);
     }
 
-    public function create()
-    {
-        $customers = DB::table('customers')->select('id', 'name')->get();
-        $users = DB::table('users')->select('id', 'name')->get();
-        $paymentMethods = DB::table('payment_methods')->select('id', 'name')->get();
-        $products = DB::table('products')->select('id', 'name', 'price')->get();
+   public function create(Request $request)
+{
+    $limit = $request->get('limit', 20);
+    $page = $request->get('page', 1);
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'customers' => $customers,
-                'users' => $users,
-                'paymentMethods' => $paymentMethods,
-                'products' => $products,
-            ],
-        ]);
-    }
+    $customers = DB::table('customers')->select('id', 'name')->get();
+    $users = DB::table('users')->select('id', 'name')->get();
+    $paymentMethods = DB::table('payment_methods')->select('id', 'name')->get();
+
+    
+    $products = Product::select('id', 'name', 'price')->paginate($limit, ['*'], 'page', $page);
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'customers' => $customers,
+            'users' => $users,
+            'paymentMethods' => $paymentMethods,
+            'products' => $products->items(),
+            'hasMore' => $products->hasMorePages(),
+        ],
+    ]);
+}
+
 
     public function store(Request $request)
     {
