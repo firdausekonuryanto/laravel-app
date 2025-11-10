@@ -201,6 +201,35 @@
                 </div>
             </div>
 
+            <div class="row">
+                <div class="col-md-6 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Top 10 selling products</h4>
+                            <table class="table table-striped align-middle" style="color:white !important">
+                                <thead>
+                                    <tr>
+                                        <th style="color:white !important">#</th>
+                                        <th style="color:white !important">Produk</th>
+                                        <th style="color:white !important">Kategori</th>
+                                        <th style="color:white !important">Jumlah Terjual</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($topProducts as $index => $item)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $item->product_name }}</td>
+                                            <td>{{ $item->category_name }}</td>
+                                            <td>{{ $item->total_sold }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {{-- 📊 Revenue Charts --}}
             <div class="row">
                 <div class="col-md-6 grid-margin stretch-card">
